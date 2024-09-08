@@ -37,8 +37,8 @@ const itemsArray = [];
         }
     }
    
-    // console.log(itemsArray.length);
-    await fs.writeFileSync('./amazonProducts.json', JSON.stringify(itemsArray));
+    console.log(itemsArray.length);
+    await fs.writeFileSync('./amazonProducts.json', JSON.stringify(itemsArray),"utf8");
 
 
     await browser.close();
@@ -50,36 +50,18 @@ async function getItems(page) {
     const cards = await page.$$('div.s-main-slot.s-result-list.s-search-results.sg-row > div');
 
     for (let i = 0; i < cards.length; i++) {
-        let card = cards[i];
+        let card = await cards[i];
         try {
-            // `await` ile card.$eval kullanıyoruz
+        
             let title = await card.$eval('h2 > a > span', el => el.innerText.trim());
             let price = await card.$eval(' div.a-section.a-spacing-none.a-spacing-top-small.s-price-instructions-style > div > div:nth-child(1) > a > span > span.a-offscreen', el => el.innerText.trim());
             let rate = await card.$eval(' div.a-row.a-size-small > span:nth-child(1) > span > a > i > span', el => el.innerText.trim());
-            let poster = await card.$eval(' span > a > div > img', el => el.src);
+            let img = await card.$eval(' span > a > div > img', el => el.src);
 
-            let item = { title,price,rate,poster };
+            let item = { title,price,rate,img };
             itemsArray.push(item);
         } catch (error) {
             // console.log(`Error extracting data from card ${i}: ${error}`);
         }
     }
-}
-
-
-async function scrollPage(page) {
-    const viewportHeight = 800;
-    await page.setViewport({ width: 1440, height: viewportHeight });
-    let previousHeight;
-    let currentHeight = await page.evaluate(() => document.body.scrollHeight);
-    while (true) {
-      previousHeight = currentHeight;
-      await page.evaluate((_viewportHeight) => {
-        window.scrollBy(0, _viewportHeight);
-      }, viewportHeight);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      currentHeight = await page.evaluate(() => document.body.scrollHeight);
-      if (previousHeight === currentHeight) break;
-    }
-    
 }

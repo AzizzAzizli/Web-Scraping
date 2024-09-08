@@ -2,3 +2,7 @@
 .env
 /amazonProducts.json
 /amazontmp
+/imdbmoviesTop250.json
+/imdbtmp
+/lmstmp
+/lmsUserData.json
