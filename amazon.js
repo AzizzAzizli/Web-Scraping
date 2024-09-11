@@ -1,11 +1,13 @@
 const puppeteer = require("puppeteer");
 const fs = require('fs');
 const itemsArray = [];
+let total = 0;
 (async () => {
 
     const browser = await puppeteer.launch({
         headless: false,
         defaultViewport: null,
+        args: ['--start-maximized'],
         userDataDir: './amazontmp'
     });
     const page = await browser.newPage();
@@ -15,8 +17,8 @@ const itemsArray = [];
     let isLastPage = false;
     while (!isLastPage) {
 
-        await page.waitForSelector('div.s-main-slot.s-result-list.s-search-results.sg-row > div');
-    
+        await page.waitForSelector('div.s-main-slot.s-result-list.s-search-results.sg-row > div[class="sg-col-4-of-24 sg-col-4-of-12 s-result-item s-asin sg-col-4-of-16 sg-col s-widget-spacing-small sg-col-4-of-20 gsx-ies-anchor"]');
+        await autoScroll(page);
         await getItems(page);
 
         const nextBtn = await page.$(' div > div > span > a.s-pagination-item.s-pagination-next.s-pagination-button.s-pagination-separator');
@@ -38,17 +40,18 @@ const itemsArray = [];
     }
    
     console.log(itemsArray.length);
+    console.log(total);
     await fs.writeFileSync('./amazonProducts.json', JSON.stringify(itemsArray),"utf8");
 
 
-    await browser.close();
+    // await browser.close();
 })()
 
 async function getItems(page) {
-    await page.waitForSelector('div.s-main-slot.s-result-list.s-search-results.sg-row > div');
-    
-    const cards = await page.$$('div.s-main-slot.s-result-list.s-search-results.sg-row > div');
-
+    await page.waitForSelector('div.s-main-slot.s-result-list.s-search-results.sg-row > div[class="sg-col-4-of-24 sg-col-4-of-12 s-result-item s-asin sg-col-4-of-16 sg-col s-widget-spacing-small sg-col-4-of-20 gsx-ies-anchor"]');
+   
+    const cards = await page.$$('div.s-main-slot.s-result-list.s-search-results.sg-row > div[class="sg-col-4-of-24 sg-col-4-of-12 s-result-item s-asin sg-col-4-of-16 sg-col s-widget-spacing-small sg-col-4-of-20 gsx-ies-anchor"]');
+    total += cards.length;
     for (let i = 0; i < cards.length; i++) {
         let card = await cards[i];
         try {
@@ -61,7 +64,25 @@ async function getItems(page) {
             let item = { title,price,rate,img };
             itemsArray.push(item);
         } catch (error) {
-            // console.log(`Error extracting data from card ${i}: ${error}`);
+         // console.log(`Error extracting data from card ${i}: ${error}`);
         }
     }
+}
+
+async function autoScroll(page) {
+    await page.evaluate(async () => {
+        await new Promise((resolve, reject) => {
+            let totalHeight = 0;
+            const distance = 500; 
+            const timer = setInterval(async () => {
+                const scrollHeight = document.body.scrollHeight;
+                window.scrollBy(0, distance); 
+                totalHeight += distance;
+                if (totalHeight >= scrollHeight) {
+                    clearInterval(timer);
+                    resolve();
+                }
+            }, 100); 
+        });
+    });
 }
