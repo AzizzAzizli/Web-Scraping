@@ -45,8 +45,7 @@ let total = 0;
     }
   }
 
-  console.log(itemsArray.length);
-  console.log(total);
+
   await fs.writeFileSync(
     "./amazonProducts.json",
     JSON.stringify(itemsArray),
