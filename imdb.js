@@ -14,6 +14,7 @@ const movies = [];
     await page.goto('https://www.imdb.com/chart/top/?ref_=nv_mv_250');
 
     await page.waitForSelector('section > div > div.ipc-page-grid.ipc-page-grid--bias-left > div > ul > li:nth-child(1)');
+    await autoScroll(page);
     const moviecards = await page.$$('section > div > div.ipc-page-grid.ipc-page-grid--bias-left > div > ul > li');
 
     for (let i = 0; i < moviecards.length; i++){
@@ -40,3 +41,22 @@ const movies = [];
 // console.log(movies);
 await browser.close()
 })()
+
+async function autoScroll(page) {
+    await page.evaluate(async () => {
+      await new Promise((resolve, reject) => {
+        let totalHeight = 0;
+        const distance = 10000;
+        const timer = setInterval(async () => {
+          const scrollHeight = document.body.scrollHeight;
+          window.scrollBy(0, distance);
+          totalHeight += distance;
+          if (totalHeight >= scrollHeight) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 100);
+      });
+    });
+  }
+  

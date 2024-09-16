@@ -106,7 +106,7 @@ async function getItems(page) {
       let item = { title, price, rate, img };
       itemsArray.push(item);
     } catch (error) {
-      console.log(`Error extracting data from card ${i}: ${error}`);
+      // console.log(`Error extracting data from card ${i}: ${error}`);
     }
   }
 }

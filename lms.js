@@ -17,7 +17,7 @@ let resultData = {
     await page.keyboard.press('Enter');
     await page.waitForNavigation();
     await page.waitForSelector('#content > div.row > div:nth-child(1) > div.card.profile-view > div.pv-body > h2');
-    const name = await page.$eval('#content > div.row > div:nth-child(1) > div.card.profile-view > div.pv-body > h2', el => el.innerText.trim());
+    const name = await page.$eval('#content > div.row > div:nth-child(1) > div.card.profile-view > div.pv-body > h2', el => el.innerText.split(' ')[0].trim()+' '+el.innerText.split(' ')[1].trim());
     resultData.name = name;
     await page.waitForSelector('#sidebar > div > ul.nav > ul > li:nth-child(2)', { visible: true });
     await page.click('#sidebar > div > ul.nav > ul > li:nth-child(2)');
@@ -31,7 +31,7 @@ let resultData = {
 
     for (let i = 0; i < subjectCards.length; i++){
         try {
-            console.log(i);
+            // console.log(i);
             
             // await new Promise((resolve) => setTimeout(resolve, 1000));
             const updatedSubjectBoxes = await page.$$('#accordion > div');
@@ -51,11 +51,11 @@ let resultData = {
            
        
         } catch (error) {
-            console.log('error for',subjectCards[i],error);
+            // console.log('error for',subjectCards[i],error);
         };
     };
     resultData.data = subjects;
-    console.log(resultData);
+    // console.log(resultData);
     await fs.writeFileSync('./lmsUserData.json', JSON.stringify(resultData), 'utf8');
     await browser.close();
 })()
